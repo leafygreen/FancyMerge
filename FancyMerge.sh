@@ -5,16 +5,19 @@ DESTREMOTE=''
 SRCREMOTE=''
 COMMITMESSAGE=''
 
+error()
+{
+  echo $*
+  exit 1
+}
+
 # Make sure current dir is a git repo
-(git rev-parse --is-inside-work-tree &> /dev/null) || echo "Not a git repo" && exit 1;
+(git rev-parse --is-inside-work-tree &> /dev/null) || error "Not a git repo"
 
 # Stash old work
 {
   git stash -u
-} || {
-  echo "Could not stash."
-  exit 1
-}
+} || error "Could not stash."
 
 # Fetch PR to local
 
@@ -41,8 +44,6 @@ git rebase $DESTREMOTE/$DESTBRANCH
 
 # Restore
 {
-  git stash pop
-} || {
-  echo "Could not pop stash."
-  exit 1
-}
+  git stash -u
+} || error "Could not stash."
+
