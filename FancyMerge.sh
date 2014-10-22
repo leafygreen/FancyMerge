@@ -1,4 +1,8 @@
 # Initialize
+DESTBRANCH=''
+SRCBRANCH=''
+DESTREMOTE=''
+SRCREMOTE=''
 
 # Make sure current dir is a git repo
 (git rev-parse --is-inside-work-tree &> /dev/null) || echo "Not a git repo" && exit 1;
@@ -8,8 +12,11 @@
 # Fetch PR to local
 
 # Move to working branch
+git checkout $SRCBRANCH
+git fetch $SRCREMOTE $SRCBRANCH
 
 # Squash
+SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
 
 # Rebase 
 
