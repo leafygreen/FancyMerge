@@ -3,6 +3,7 @@ DESTBRANCH=''
 SRCBRANCH=''
 DESTREMOTE=''
 SRCREMOTE=''
+COMMMITMESSAGE=''
 
 # Make sure current dir is a git repo
 (git rev-parse --is-inside-work-tree &> /dev/null) || echo "Not a git repo" && exit 1;
@@ -22,9 +23,13 @@ git checkout $SRCBRANCH
 git fetch $SRCREMOTE $SRCBRANCH
 
 # Squash
+git fetch $DESTREMOTE/$DESTBRANCH
 SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
+git reset --soft $SQUASHBASE
+git commit -m "$COMMITMESSAGE"
 
 # Rebase 
+git rebase $DESTREMOTE/$DESTBRANCH
 
 # Force Push
 
