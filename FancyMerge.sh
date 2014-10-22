@@ -35,6 +35,23 @@ recover_merge()
   git reset --hard $SRCBRANCH
 }
 
+# Get parameters from command line
+if [[ -z "$1" ]]; then
+    error "Error: need a pull-request number as the first argument"
+else
+    number=$1
+fi
+
+if [[ -n "$2" ]]; then
+    remote=$2
+else
+    remote='origin'
+fi
+
+uri=$( git remote -v 2> /dev/null | grep "$remote" | head -1 | cut -f 2 )
+[[ -n "$uri" ]] || error "Error: couldn't determine origin URI"
+uri="${uri% (fetch)}"
+uri="${uri% (push)}"
 
 # Make sure current dir is a git repo
 (git rev-parse --is-inside-work-tree &> /dev/null) || error "Not a git repo"
@@ -45,6 +62,8 @@ recover_merge()
 } || error "Could not stash."
 
 # Fetch PR to local
+(git fetch -f "$uri" "refs/pull/$number/head:PR/$number" &> /dev/null) \
+    || error "Error: can't fetch PR $number from $uri"
 
 # Move to working branch
 git checkout $SRCBRANCH
