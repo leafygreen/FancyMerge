@@ -8,6 +8,12 @@ SRCREMOTE=''
 (git rev-parse --is-inside-work-tree &> /dev/null) || echo "Not a git repo" && exit 1;
 
 # Stash old work
+{
+  git stash -u
+} || {
+  echo "Could not stash."
+  exit 1
+}
 
 # Fetch PR to local
 
@@ -29,3 +35,9 @@ SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
 # Push
 
 # Restore
+{
+  git stash -u
+} || {
+  echo "Could not stash."
+  exit 1
+}
