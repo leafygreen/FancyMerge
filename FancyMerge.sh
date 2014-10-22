@@ -3,7 +3,7 @@ DESTBRANCH=''
 SRCBRANCH=''
 DESTREMOTE=''
 SRCREMOTE=''
-COMMMITMESSAGE=''
+COMMITMESSAGE=''
 
 # Make sure current dir is a git repo
 (git rev-parse --is-inside-work-tree &> /dev/null) || echo "Not a git repo" && exit 1;
@@ -41,8 +41,8 @@ git rebase $DESTREMOTE/$DESTBRANCH
 
 # Restore
 {
-  git stash -u
+  git stash pop
 } || {
-  echo "Could not stash."
+  echo "Could not pop stash."
   exit 1
 }
