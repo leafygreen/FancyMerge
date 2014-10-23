@@ -1,11 +1,6 @@
 #!/bin/bash
 
 # Initialize
-DESTBRANCH=''
-SRCBRANCH=''
-DESTREMOTE=''
-SRCREMOTE=''
-COMMITMESSAGE=''
 INSTALLDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 error()
@@ -89,15 +84,15 @@ echo "Starting FancyMerge from $SRCREMOTE/$SRCBRANCH to $DESTREMOTE/$DESTBRANCH"
 } || error "Could not stash."
 
 # Move to working branch
-git checkout $SRCBRANCH
 git fetch $SRCREMOTE $SRCBRANCH
+git checkout $SRCBRANCH
 
 # Squash
 echo "Squashing commits into a single commit..."
-git fetch $DESTREMOTE/$DESTBRANCH
+git fetch $DESTREMOTE $DESTBRANCH
 SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
 git reset --soft $SQUASHBASE
-git commit -m "$COMMITMESSAGE"
+git commit
 
 # Rebase 
 echo "Attempting to rebase onto $DESTREMOTE/$DESTBRANCH"
@@ -105,15 +100,15 @@ git rebase $DESTREMOTE/$DESTBRANCH
 REBASE_EXIT_CODE=$?
 
 # Manual recover from bad rebase
-if [ $REBASE_EXIT_CODE -ne 0]; then
+if [ $REBASE_EXIT_CODE -ne 0 ]; then
   second_exit=spawn_shell recover_merge
-  if [ $second_exit -ne 0]; then
+  if [ $second_exit -ne 0 ]; then
     exit 1
   fi
 fi
 
 # Force Push
-git push -f $SRCREMOTE/$SRCBRANCH
+git push -f $SRCREMOTE $SRCBRANCH
 
 # Checkout master
 git checkout $DESTBRANCH
