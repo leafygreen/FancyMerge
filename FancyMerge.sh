@@ -19,8 +19,9 @@ spawn_shell()
   # $1: function to run if subshell returns != 0
   recover_function=$1
 
-  echo "rebase failed, spawning shell"
-  bash
+  echo "rebase failed, spawning $SHELL. When rebase complete, run 'exit'"
+  echo "If you cannot rebase successfully, run 'git rebase --abort' and then 'exit 1'"
+  $SHELL
   exit_code=$?
 
   if ((exit_code!=0)) && [[ -n $1 ]]; then
@@ -80,39 +81,48 @@ if [ -z "$SRCBRANCH" -o -z "$DESTBRANCH" ]; then
   exit 1
 fi
 
-echo "Fancy Merge from $SRCREMOTE/$SRCBRANCH to $DESTREMOTE/$DESTBRANCH"
+echo "Starting FancyMerge from $SRCREMOTE/$SRCBRANCH to $DESTREMOTE/$DESTBRANCH"
 
 # Stash old work
 {
   git stash -u
 } || error "Could not stash."
 
-# Fetch PR to local
-
 # Move to working branch
 git checkout $SRCBRANCH
 git fetch $SRCREMOTE $SRCBRANCH
 
 # Squash
+echo "Squashing commits into a single commit..."
 git fetch $DESTREMOTE/$DESTBRANCH
 SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
 git reset --soft $SQUASHBASE
 git commit -m "$COMMITMESSAGE"
 
 # Rebase 
+echo "Attempting to rebase onto $DESTREMOTE/$DESTBRANCH"
 git rebase $DESTREMOTE/$DESTBRANCH
-exit_code=$?
+REBASE_EXIT_CODE=$?
 
 # Manual recover from bad rebase
-((exit_code != 0)) && spawn_shell recover_merge
+if [ $REBASE_EXIT_CODE -ne 0]; then
+  second_exit=spawn_shell recover_merge
+  if [ $second_exit -ne 0]; then
+    exit 1
+  fi
+fi
 
 # Force Push
+git push -f $SRCREMOTE/$SRCBRANCH
 
 # Checkout master
+git checkout $DESTBRANCH
 
 # Merge
+git merge --ff-only $SRCBRANCH
 
 # Push
+git push $DESTREMOTE $DESTBRANCH
 
 # Restore
 {
