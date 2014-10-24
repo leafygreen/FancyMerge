@@ -90,7 +90,7 @@ git checkout $SRCBRANCH
 # Squash
 echo "Squashing commits into a single commit..."
 git fetch $DESTREMOTE $DESTBRANCH
-SQUASHBASE=$(git merge-base --fork-point $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
+SQUASHBASE=$(git merge-base $DESTREMOTE/$DESTBRANCH $SRCBRANCH)
 git reset --soft $SQUASHBASE
 git commit
 
