@@ -34,7 +34,7 @@ recover_merge()
 
 # Check Arguments
 if [ $# -ne 2 ]; then
-  echo "Usage: $0 <github_repo> <PR#>"
+  echo "Usage: git FancyMerge <github_repo> <PR#>"
   exit 1
 fi
 
